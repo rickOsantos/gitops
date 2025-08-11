@@ -37,7 +37,7 @@ RUN echo '<!DOCTYPE html><html><head><title>Health Check</title></head><body><h1
 EXPOSE 80
 
 # Labels para metadados
-LABEL maintainer="seu-email@exemplo.com"
+LABEL maintainer="ricardo.eletris@gmail.com"
 LABEL version="1.0"
 LABEL description="GitOps Dashboard Application"
 
