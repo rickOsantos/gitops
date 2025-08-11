@@ -11,9 +11,9 @@ RUN addgroup -g 1000 appuser && \
 
 # Copiar arquivos da aplicação
 COPY src/ /usr/share/nginx/html/
-COPY *.html /usr/share/nginx/html/ 2>/dev/null || true
-COPY *.css /usr/share/nginx/html/ 2>/dev/null || true
-COPY *.js /usr/share/nginx/html/ 2>/dev/null || true
+COPY *.html /usr/share/nginx/html/ 
+COPY *.css /usr/share/nginx/html/ 
+COPY *.js /usr/share/nginx/html/
 
 # Copiar configuração personalizada do nginx
 COPY k8s/configmap.yml /tmp/

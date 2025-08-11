@@ -6,7 +6,8 @@ node_modules
 npm-debug.log
 Dockerfile
 .dockerignore
-k8s/
+
+
 terraform/
 .vscode/
 .idea/
