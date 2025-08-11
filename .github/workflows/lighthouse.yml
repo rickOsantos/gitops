@@ -1,0 +1,33 @@
+# .github/workflows/lighthouse.yml
+name: 🏠 Lighthouse CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lighthouse:
+    name: 🚦 Lighthouse Audit
+    runs-on: ubuntu-latest
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: 🏠 Run Lighthouse CI
+      run: |
+        npm install -g @lhci/cli
+        lhci collect --url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+        lhci assert --preset=lighthouse:recommended
+
+    - name: 📊 Upload Lighthouse Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: lighthouse-results
+        path: .lighthouseci/

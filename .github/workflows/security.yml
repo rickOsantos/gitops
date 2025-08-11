@@ -1,0 +1,35 @@
+# .github/workflows/security.yml
+name: 🔒 Security Scan
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Toda segunda-feira às 6h
+  push:
+    branches: [ main ]
+
+jobs:
+  security:
+    name: 🛡️ Security Analysis
+    runs-on: ubuntu-latest
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+
+    - name: 🔍 Run CodeQL Analysis
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+
+    - name: 🏗️ Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: 📊 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+    - name: 🐳 Run Docker Security Scan
+      if: hashFiles('Dockerfile') != ''
+      run: |
+        docker build -t security-scan .
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          aquasec/trivy image --severity HIGH,CRITICAL security-scan
+

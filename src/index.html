@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitOps Dashboard - Meu Projeto</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-online {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .status-warning {
+            background-color: #f59e0b;
+        }
+
+        .status-offline {
+            background-color: #ef4444;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 3rem;
+            font-size: 0.9rem;
+        }
+
+        .deployment-log {
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 GitOps Dashboard</h1>
+            <p>Projeto de Deploy Automático - Status em Tempo Real</p>
+        </header>
+
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="card-header">
+                    <div class="card-icon">🏗️</div>
+                    <div class="card-title">Build Status</div>
+                </div>
+                <div class="metric">
+                    <span>Status:</span>
+                    <span class="metric-value">
+                        <span class="status-indicator status-online"></span>
+                        Online
+                    </span>
+                </div>
+                <div class="metric">
+                    <span>Último Deploy:</span>
+                    <span class="metric-value" id="lastDeploy">Carregando...</span>
+                </div>
+                <div class="metric">
+                    <span>Versão:</span>
+                    <span class="metric-value">v1.2.3</span>
+                </div>
+                <div class="metric">
+                    <span>Environment:</span>
+                    <span class="metric-value">Production</span>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">System Metrics</div>
+                </div>
+                <div class="metric">
+                    <span>CPU Usage:</span>
+                    <span class="metric-value" id="cpuUsage">45%</span>
+                </div>
+                <div class="metric">
+                    <span>Memory:</span>
+                    <span class="metric-value" id="memoryUsage">2.1GB / 4GB</span>
+                </div>
+                <div class="metric">
+                    <span>Uptime:</span>
+                    <span class="metric-value" id="uptime">15d 8h 32m</span>
+                </div>
+                <div class="metric">
+                    <span>Requests/min:</span>
+                    <span class="metric-value" id="requests">234</span>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="card-header">
+                    <div class="card-icon">🌐</div>
+                    <div class="card-title">Services</div>
+                </div>
+                <div class="metric">
+                    <span>API Gateway:</span>
+                    <span class="metric-value">
+                        <span class="status-indicator status-online"></span>
+                        Healthy
+                    </span>
+                </div>
+                <div class="metric">
+                    <span>Database:</span>
+                    <span class="metric-value">
+                        <span class="status-indicator status-online"></span>
+                        Connected
+                    </span>
+                </div>
+                <div class="metric">
+                    <span>Cache:</span>
+                    <span class="metric-value">
+                        <span class="status-indicator status-warning"></span>
+                        Warning
+                    </span>
+                </div>
+                <div class="metric">
+                    <span>SSL Certificate:</span>
+                    <span class="metric-value">
+                        <span class="status-indicator status-online"></span>
+                        Valid (89 days)
+                    </span>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <div class="card-header">
+                    <div class="card-icon">🔄</div>
+                    <div class="card-title">GitOps Status</div>
+                </div>
+                <div class="metric">
+                    <span>ArgoCD:</span>
+                    <span class="metric-value">
+                        <span class="status-indicator status-online"></span>
+                        Synced
+                    </span>
+                </div>
+                <div class="metric">
+                    <span>Last Commit:</span>
+                    <span class="metric-value" id="lastCommit">abc123f</span>
+                </div>
+                <div class="metric">
+                    <span>Branch:</span>
+                    <span class="metric-value">main</span>
+                </div>
+                <div class="metric">
+                    <span>Auto Sync:</span>
+                    <span class="metric-value">Enabled</span>
+                </div>
+                <div class="deployment-log" id="deployLog">
+                    <div>✅ [2024-08-06 14:32:15] Build completed successfully</div>
+                    <div>🚀 [2024-08-06 14:32:45] Deployment started</div>
+                    <div>📦 [2024-08-06 14:33:12] Container image pushed</div>
+                    <div>⚡ [2024-08-06 14:33:28] Service updated</div>
+                    <div>✨ [2024-08-06 14:33:35] Deployment completed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="triggerDeploy()">
+                🚀 Trigger Deploy
+            </button>
+            <a href="/health" class="btn btn-secondary">
+                ❤️ Health Check
+            </a>
+            <a href="/metrics" class="btn btn-secondary">
+                📊 View Metrics
+            </a>
+            <a href="https://github.com/rickOsantos/gitops" class="btn btn-secondary" target="_blank">
+                📱 GitHub Repo
+            </a>
+        </div>
+
+        <footer class="footer">
+            <p>🔧 Powered by GitOps | 🌟 Deploy automático a cada commit</p>
+            <p>Última atualização: <span id="currentTime"></span></p>
+        </footer>
+    </div>
+
+    <script>
+        // Atualizar dados em tempo real
+        function updateMetrics() {
+            // CPU Usage (simulado)
+            const cpu = Math.floor(Math.random() * 20) + 35;
+            document.getElementById('cpuUsage').textContent = cpu + '%';
+            
+            // Memory (simulado)
+            const memory = (Math.random() * 1 + 1.5).toFixed(1);
+            document.getElementById('memoryUsage').textContent = `${memory}GB / 4GB`;
+            
+            // Requests per minute (simulado)
+            const requests = Math.floor(Math.random() * 100) + 200;
+            document.getElementById('requests').textContent = requests.toString();
+            
+            // Uptime
+            const now = new Date();
+            const start = new Date('2024-07-22');
+            const diff = now - start;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById('uptime').textContent = `${days}d ${hours}h ${minutes}m`;
+            
+            // Atualizar timestamp
+            document.getElementById('currentTime').textContent = now.toLocaleString('pt-BR');
+        }
+
+        // Função para simular deploy
+        function triggerDeploy() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Deploying...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '✅ Deployed!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }, 3000);
+            
+            // Adicionar nova entrada no log
+            const log = document.getElementById('deployLog');
+            const newEntry = document.createElement('div');
+            const timestamp = new Date().toLocaleString('pt-BR');
+            newEntry.innerHTML = `🔄 [${timestamp}] Manual deploy triggered by user`;
+            log.appendChild(newEntry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Atualizar dados iniciais
+        document.getElementById('lastDeploy').textContent = 'Há 2 horas';
+        document.getElementById('lastCommit').textContent = 'abc123f';
+        
+        // Atualizar métricas a cada 5 segundos
+        updateMetrics();
+        setInterval(updateMetrics, 5000);
+
+        // PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+</html>

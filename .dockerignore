@@ -1,0 +1,13 @@
+.git
+.github
+*.md
+.gitignore
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+k8s/
+terraform/
+.vscode/
+.idea/
+*.log
